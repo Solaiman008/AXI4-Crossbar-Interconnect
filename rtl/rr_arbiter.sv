@@ -1,10 +1,10 @@
 module rr_arbiter #(
     parameter int NUM_REQ = 2
 )(
-    input  logic aclk,
-    input  logic arst_n,
-    input  logic [NUM_REQ-1:0] req,
-    input  logic unlock_en,
+    input logic aclk,
+    input logic arst_n,
+    input logic [NUM_REQ-1:0] req,
+    input logic unlock_en,
 
     output logic [NUM_REQ-1:0] grant,
     output logic [$clog2(NUM_REQ)-1:0] grant_idx,
