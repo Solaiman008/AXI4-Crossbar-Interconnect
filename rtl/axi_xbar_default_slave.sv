@@ -1,11 +1,15 @@
 module axi_xbar_default_slave #(
     parameter int ID_WIDTH   = 4,
-    parameter int DATA_WIDTH = 64
+    parameter int DATA_WIDTH = 64,
+	parameter int NUM_MASTERS = 2,
+  	parameter int MASTER_WIDTH = (NUM_MASTERS > 1) ? $clog2(NUM_MASTERS) : 1,
+  	parameter int EXT_ID_WIDTH = ID_WIDTH + MASTER_WIDTH
+
 )(
 	input logic aclk,
 	input logic arst_n,
 
-	input logic [ID_WIDTH-1:0] awid,
+	input logic [EXT_ID_WIDTH-1:0] awid,
 	input logic awvalid,
 	output logic awready,
 
@@ -13,17 +17,17 @@ module axi_xbar_default_slave #(
 	input logic wvalid,
 	output logic wready,
 
-	output logic [ID_WIDTH-1:0] bid,
+	output logic [EXT_ID_WIDTH-1:0] bid,
 	output logic [1:0] bresp,
 	output logic bvalid,
 	input logic bready,
 
-	input logic [ID_WIDTH-1:0] arid,
+	input logic [EXT_ID_WIDTH-1:0] arid,
 	input logic [7:0] arlen,
 	input logic arvalid,
 	output logic arready,
 
-	output logic [ID_WIDTH-1:0] rid,
+	output logic [EXT_ID_WIDTH-1:0] rid,
 	output logic [DATA_WIDTH-1:0] rdata,
 	output logic [1:0] rresp,
 	output logic rlast,
@@ -33,7 +37,7 @@ module axi_xbar_default_slave #(
 
     typedef enum logic [1:0] {W_IDLE, W_SINK, W_RESP} w_states;
     w_states w_state;
-    logic [ID_WIDTH-1:0] wid_reg;
+    logic [EXT_ID_WIDTH-1:0] wid_reg;
 
     assign awready = (w_state == W_IDLE);
     assign wready = (w_state == W_SINK);
@@ -65,7 +69,7 @@ module axi_xbar_default_slave #(
 
     typedef enum logic {R_IDLE, R_BURST} r_states;
     r_states r_state;
-    logic [ID_WIDTH-1:0] rid_reg;
+    logic [EXT_ID_WIDTH-1:0] rid_reg;
     logic [7:0] rlen_cnt;
 
     assign arready = (r_state == R_IDLE);

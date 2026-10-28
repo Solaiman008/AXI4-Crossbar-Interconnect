@@ -40,22 +40,26 @@ module sync_fifo #(
 		data_out = reg_file[read_addr];
 	end
 
-	always_ff @(posedge clk) begin
+	always_ff @(posedge clk or negedge resetn) begin
 		if(!resetn) 
 			write_ptr <= 0;
 		else if(write_en)
 			write_ptr <= write_ptr + 1;
 	end
 
-	always_ff @(posedge clk) begin
+	always_ff @(posedge clk or negedge resetn) begin
     	if(!resetn) 
              read_ptr <= 0;
         else if(read_en)
              read_ptr <= read_ptr +1;
  	end
 	
-	always_ff @(posedge clk) begin
-		if(write_en)
+	always_ff @(posedge clk or negedge resetn) begin
+		if(!resetn)
+			for (int i = 0; i < 2**ADDR_SIZE; i++)
+        		reg_file[i] = '0;
+
+		else if(write_en)
 			reg_file[write_addr] <= data_in;
 	end
 
