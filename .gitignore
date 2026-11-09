@@ -20,6 +20,7 @@
 .Xil/
 xsim.dir/
 sim/test_report/
+sim/cov_rep/
 sim/xsim_coverage_report/
 sim/*.str
 webtalk*.log

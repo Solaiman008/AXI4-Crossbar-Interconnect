@@ -10,10 +10,10 @@ class axi_xbar_environment;
     mailbox wr_mon_to_sb_m0, wr_mon_to_sb_m1, wr_mon_to_sb_s0, wr_mon_to_sb_s1;
     mailbox rd_mon_to_sb_m0, rd_mon_to_sb_m1, rd_mon_to_sb_s0, rd_mon_to_sb_s1;
     function new(
-		virtual axi_xbar_if vif_m0, 
-		virtual axi_xbar_if vif_m1, 
-		virtual axi_xbar_if vif_s0, 
-		virtual axi_xbar_if vif_s1
+		virtual axi_xbar_if #(ID_WIDTH) vif_m0, 
+		virtual axi_xbar_if #(ID_WIDTH) vif_m1, 
+		virtual axi_xbar_if #(EXT_ID_WIDTH) vif_s0, 
+		virtual axi_xbar_if #(EXT_ID_WIDTH) vif_s1
 	);
         $display("Environment initialized at time %0d", $time);
         
@@ -33,11 +33,11 @@ class axi_xbar_environment;
         agt_s0 = new(vif_s0, wr_mon_to_sb_s0, rd_mon_to_sb_s0, cov, 0);
         agt_s1 = new(vif_s1, wr_mon_to_sb_s1, rd_mon_to_sb_s1, cov, 1);
         //sb = new(mon_to_sb);
-		//sb = new(
-		//	wr_mon_to_sb_m0, wr_mon_to_sb_m1, wr_mon_to_sb_s0, wr_mon_to_sb_s1,
-		//	rd_mon_to_sb_m0, rd_mon_to_sb_m1, rd_mon_to_sb_s0, rd_mon_to_sb_s1
-		//	);
-		sb = new();
+		sb = new(
+			wr_mon_to_sb_m0, wr_mon_to_sb_m1, wr_mon_to_sb_s0, wr_mon_to_sb_s1,
+			rd_mon_to_sb_m0, rd_mon_to_sb_m1, rd_mon_to_sb_s0, rd_mon_to_sb_s1
+			);
+		//sb = new();
     endfunction
 
     task run;

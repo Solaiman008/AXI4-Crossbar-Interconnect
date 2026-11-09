@@ -1,0 +1,18 @@
+package axi_xbar_test_pkg;
+	`include "axi_xbar_base_test.sv"
+	`include "axi_xbar_reset_test.sv"
+	`include "axi_xbar_single_read_write_test.sv"
+	`include "axi_xbar_addr_decoding_test.sv"
+	`include "axi_xbar_arbitration_test.sv"
+	`include "axi_xbar_req_arbitration_test.sv"
+	`include "axi_xbar_resp_arbitration_test.sv"
+	`include "axi_xbar_concurrent_routing_test.sv"
+	`include "axi_xbar_burst_transfer_test.sv"
+	`include "axi_xbar_id_interleaving_test.sv"
+	`include "axi_xbar_backpressure_test.sv"
+	`include "axi_xbar_err_test.sv"
+	`include "axi_xbar_stress_traffic_test.sv"
+	`include "axi_xbar_edge_addr_test.sv"
+	`include "axi_xbar_data_pattern_test.sv"
+	`include "axi_xbar_id_tracking_test.sv"
+endpackage

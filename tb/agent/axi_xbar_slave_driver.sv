@@ -5,8 +5,8 @@ class axi_xbar_slave_driver;
 	virtual axi_xbar_if #(EXT_ID_WIDTH) vif;
 	mailbox wr_gen_to_drv;
 	mailbox rd_gen_to_drv;
-	axi_xbar_write_transaction wr_tr;
-	axi_xbar_read_transaction rd_tr;
+	axi_xbar_write_transaction #(EXT_ID_WIDTH) wr_tr;
+	axi_xbar_read_transaction #(EXT_ID_WIDTH) rd_tr;
 
 	function new(
 		virtual axi_xbar_if #(EXT_ID_WIDTH) vif,
@@ -25,10 +25,7 @@ class axi_xbar_slave_driver;
 		fork
 			forever begin
 				wr_gen_to_drv.get(wr_tr);
-				if(!wr_tr.arst_n)
-					reset();
-				else
-					write(wr_tr);
+				write(wr_tr);
 			end
 			forever begin
 				rd_gen_to_drv.get(rd_tr);
@@ -37,18 +34,17 @@ class axi_xbar_slave_driver;
 		join_none
 	endtask
 
-
-	task write(axi_xbar_write_transaction tr);
+	task write(axi_xbar_write_transaction #(EXT_ID_WIDTH) tr);
 		logic [EXT_ID_WIDTH-1:0] captured_awid;
-		wait(vif.arst_n);
+		wait(vif.arst_n === 1'b1);
 		fork
+			//$display("Driver Write Transaction Drived");
 			begin
 				@(posedge vif.aclk);
 				vif.awready <= tr.awready;
-
 				do
 					@(posedge vif.aclk);
-				while(!vif.awvalid);
+				while(!(vif.awvalid && vif.awready));
 
 				captured_awid = vif.awid;
 				vif.awready <= 0;
@@ -56,10 +52,9 @@ class axi_xbar_slave_driver;
 			begin
 				@(posedge vif.aclk);
 				vif.wready <= tr.wready;
-
 				do
 					@(posedge vif.aclk);
-				while(!(vif.wvalid && vif.wlast));
+				while(!(vif.wvalid && vif.wready && vif.wlast));
 
 				vif.wready <= 0;
 			end
@@ -72,20 +67,25 @@ class axi_xbar_slave_driver;
 
 		do
 			@(posedge vif.aclk);
-		while(!vif.bready);
+		while(!(vif.bvalid && vif.bready));
+		//$display("===================================================================================================================");
+        //$display("from driver id = %0b", vif.bid);
+        //$display("===================================================================================================================");
 
 		vif.bvalid <= 0;
 	endtask
 
-	task read(axi_xbar_read_transaction tr);
+	task read(axi_xbar_read_transaction #(EXT_ID_WIDTH) tr);
 		logic [EXT_ID_WIDTH-1:0] captured_arid;
-		wait(vif.arst_n);
+		wait(vif.arst_n === 1'b1);
+
+		//$display("Driver Read Transaction Drived");
 		@(posedge vif.aclk);
 		vif.arready <= tr.arready;
 
 		do
 			@(posedge vif.aclk);
-		while(!vif.arvalid);
+		while(!(vif.arvalid && vif.arready));
 
 		captured_arid = vif.arid;
 		vif.arready <= 0;
@@ -100,11 +100,10 @@ class axi_xbar_slave_driver;
 
 			do
 				@(posedge vif.aclk);
-			while(!vif.rready);
+			while(!(vif.rvalid && vif.rready));
 		end
 
 		vif.rvalid <= 0;
 		vif.rlast <= 0;
 	endtask
-
 endclass

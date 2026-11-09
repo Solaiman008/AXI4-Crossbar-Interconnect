@@ -39,20 +39,22 @@ class axi_xbar_master_driver;
 	endtask
 
 	task reset();
-		vif.arst_n = 0;
-		vif.awvalid = 0;
-		vif.wvalid = 0;
-		vif.bready = 0;
-		vif.arvalid = 0;
-		vif.rready = 0;
+		vif.arst_n <= 0;
+		vif.awvalid <= 0;
+		vif.wvalid <= 0;
+		vif.bready <= 0;
+		vif.arvalid <= 0;
+		vif.rready <= 0;
 		repeat(RST_CYCLE)
 			@(posedge vif.aclk);
-		vif.arst_n = 1;
+		vif.arst_n <= 1;
+		@(posedge vif.aclk);
 	endtask
 
 	task write(axi_xbar_write_transaction tr);
-		wait(vif.arst_n);
+		wait(vif.arst_n === 1'b1);
 		fork
+			//$display("Master Write Transaction Drived");
 			begin
 				@(posedge vif.aclk);
 				vif.awid <= tr.awid;
@@ -64,7 +66,7 @@ class axi_xbar_master_driver;
 
 				do
 					@(posedge vif.aclk);
-				while(!vif.awready);
+				while(!(vif.awvalid && vif.awready));
 
 				vif.awvalid <= 0;
 			end
@@ -78,7 +80,7 @@ class axi_xbar_master_driver;
 
 					do
 						@(posedge vif.aclk);
-					while(!vif.wready);
+					while(!(vif.wvalid && vif.wready));
 				end
 
 				vif.wvalid <= 0;
@@ -87,10 +89,9 @@ class axi_xbar_master_driver;
 			begin
 				@(posedge vif.aclk);
 				vif.bready <= tr.bready;
-
 				do
 					@(posedge vif.aclk);
-				while(!vif.bvalid);
+				while(!(vif.bvalid && vif.bready));
 
 				vif.bready <= 0;
 			end
@@ -98,8 +99,9 @@ class axi_xbar_master_driver;
 	endtask
 
 	task read(axi_xbar_read_transaction tr);
-		wait(vif.arst_n);
+		wait(vif.arst_n === 1'b1);
 		fork
+			//$display("Master Read Transaction Drived");
 			begin
 				@(posedge vif.aclk);
 				vif.arid <= tr.arid;
@@ -108,10 +110,9 @@ class axi_xbar_master_driver;
 				vif.arsize <= tr.arsize;
 				vif.arburst <= tr.arburst;
 				vif.arvalid <= tr.arvalid;
-
 				do
 					@(posedge vif.aclk);
-				while(!vif.arready);
+				while(!(vif.arvalid && vif.arready));
 
 				vif.arvalid <= 0;
 			end
@@ -119,15 +120,14 @@ class axi_xbar_master_driver;
 				@(posedge vif.aclk);
 				vif.rready <= tr.rready;
 
-				for(int i = 0; i <= tr.arlen; i++) begin
+				//for(int i = 0; i <= tr.arlen; i++) begin
 					do
 						@(posedge vif.aclk);
-					while(!vif.rvalid);
-				end
+					while(!(vif.rvalid && vif.rready && vif.rlast));
+				//end
 
 				vif.rready <= 0;
 			end
 		join
 	endtask
-
 endclass

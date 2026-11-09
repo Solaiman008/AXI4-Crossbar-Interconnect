@@ -22,6 +22,7 @@ class axi_xbar_master_generator;
 
     task reset();
         wr_tr = new();
+		rd_tr = new();
         wr_tr.arst_n = 1'b0;
         wr_tr.awvalid = 1'b0;
         wr_tr.wvalid = 1'b0;
@@ -55,10 +56,10 @@ class axi_xbar_master_generator;
 
         wr_tr.wvalid = 1'b1;
         wr_tr.bready = 1'b1;
+		//$display("Write Transaction %p, time = %0d", wr_tr, $time);
         wr_gen_to_drv.put(wr_tr);
     endtask
 
-    // Directed Read Task
     task read(
         logic [ID_WIDTH-1:0] arid,
         logic [ADDR_WIDTH-1:0] araddr,
