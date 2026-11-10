@@ -6,7 +6,7 @@ module axi_xbar_top #(
 	parameter int ID_WIDTH = 4,
 	parameter int FIFO_DEPTH = 8,
 	parameter int CNT_WIDTH = 4,
-	parameter int MASTER_WIDTH = (NUM_MASTERS > 1) ? $clog2(NUM_MASTERS) : 1,
+	parameter int MASTER_WIDTH = $clog2(NUM_MASTERS), //(NUM_MASTERS > 1) ? $clog2(NUM_MASTERS) : 1,
 	parameter int EXT_ID_WIDTH = ID_WIDTH + MASTER_WIDTH
 ) (
 	input logic aclk,
@@ -92,7 +92,7 @@ module axi_xbar_top #(
 	
 	output logic s_arst_n
 );
-
+	`include "axi_xbar_addr_decoder.vh"
 	// Target parameters and address decoding helper function
 	localparam int NUM_TARGETS = NUM_SLAVES + 1;
 	localparam int TARGET_WIDTH = (NUM_TARGETS > 1) ? $clog2(NUM_TARGETS) : 1;
@@ -679,7 +679,7 @@ module axi_xbar_top #(
 					m_bresp[m] = tb_out[t].resp;
 					m_bvalid[m] = 1'b1;
 
-					if (m_bvalid && m_bready[m]) begin
+					if (m_bvalid[m] && m_bready[m]) begin
 						tb_pop[t] = 1'b1;
 						b_resp_unlock[m] = 1'b1;
 					end
@@ -698,9 +698,9 @@ module axi_xbar_top #(
 					m_rlast[m] = tr_out[t].last;
 					m_rvalid[m] = 1'b1;
 
-					if (m_rvalid && m_rready[m]) begin
+					if (m_rvalid[m] && m_rready[m]) begin
 						tr_pop[t] = 1'b1;
-						if (tr_out[t].last)
+						//if (tr_out[t].last)
 							r_resp_unlock[m] = 1'b1;
 					end
 				end
